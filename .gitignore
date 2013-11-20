@@ -1,0 +1,3 @@
+.tox/
+Beckon.egg-info/
+*.pyc
