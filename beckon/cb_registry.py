@@ -21,6 +21,15 @@ class CallbackRegistry(object):
             return inner
         return decorator
 
+    def emit(self, msg):
+        def decorator(f):
+            def decorated(*args):
+                result = f(*args)
+                self.cb(msg, result)
+                return result
+            return decorated
+        return decorator
+
     def register_cb(self, msg, fn):
         """
         Register a new callback function for a given message key

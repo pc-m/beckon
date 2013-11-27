@@ -6,6 +6,10 @@ from mock import Mock
 from unittest import TestCase
 
 
+class _CalledException(Exception):
+    pass
+
+
 class TestCallbackRegistry(TestCase):
 
     def setUp(self):
@@ -37,11 +41,23 @@ class TestCallbackRegistry(TestCase):
     def test_accept(self):
         reg = CallbackRegistry()
 
-        class CalledException(Exception):
-            pass
-
         @reg.accept(sentinel.msg)
         def fn(params):
-            raise CalledException()
+            raise _CalledException()
 
-        self.assertRaises(CalledException, reg.cb, sentinel.msg, sentinel.param)
+        self.assertRaises(_CalledException, reg.cb, sentinel.msg, sentinel.param)
+
+    def test_emit(self):
+        reg = CallbackRegistry()
+
+        def cb(*args):
+            if args[0] == sentinel.params:
+                raise _CalledException()
+
+        @reg.emit(sentinel.msg)
+        def f(*args):
+            return sentinel.params
+
+        reg.register_cb(sentinel.msg, cb)
+
+        self.assertRaises(_CalledException, f)
